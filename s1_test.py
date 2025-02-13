@@ -56,10 +56,4 @@ with col3:
     st.image("https://cdn.pixabay.com/photo/2024/02/26/19/39/monochrome-image-8598798_1280.jpg", width=150)
 
 
-# 6. 사이드바
-with st.sidebar:
-    st.header("사이드바 메뉴")
-    menu = st.radio("메뉴 선택", ["메뉴 1", "메뉴 2", "메뉴 3"])
-    st.write("선택된 메뉴:", menu)
-
 st.write("메인 화면 내용")
