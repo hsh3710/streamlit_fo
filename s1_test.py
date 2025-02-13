@@ -1,7 +1,7 @@
-import streamlit as st
-import pandas as pd
-import matplotlib.pyplot as plt
-#ㄴㅇㅁㄴ
+import streamlit as st # type: ignore
+import pandas as pd # type: ignore
+import matplotlib.pyplot as plt # type: ignore
+
 st.write("""
           ```python 
             st.title("st.write() 활용 예시")
