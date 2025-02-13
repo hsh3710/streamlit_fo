@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-
+import matplotlib.pyplot as plt
 
 st.write("""
           ```python 
@@ -28,7 +28,11 @@ df = pd.DataFrame({'col1': [1, 2], 'col2': [3, 4]})
 st.write("### 데이터프레임")
 st.write(df)
 
-
+# 3. 그래프 출력 (Matplotlib)
+fig, ax = plt.subplots()
+ax.plot([1, 2, 3], [1, 4, 2])  # 좌표 (1,1) (2,4) (3,2) 이 3개 좌표가 연결된다.
+st.write("### Matplotlib 그래프")
+st.pyplot(fig)
 
 # 4. 이미지 출력
 st.write("### 이미지")
@@ -51,5 +55,11 @@ with col3:
     st.header("세 번째 컬럼")
     st.image("https://cdn.pixabay.com/photo/2024/02/26/19/39/monochrome-image-8598798_1280.jpg", width=150)
 
+
+# 6. 사이드바
+with st.sidebar:
+    st.header("사이드바 메뉴")
+    menu = st.radio("메뉴 선택", ["메뉴 1", "메뉴 2", "메뉴 3"])
+    st.write("선택된 메뉴:", menu)
 
 st.write("메인 화면 내용")
