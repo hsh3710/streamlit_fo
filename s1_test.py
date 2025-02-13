@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+
 
 st.write("""
           ```python 
@@ -28,11 +28,7 @@ df = pd.DataFrame({'col1': [1, 2], 'col2': [3, 4]})
 st.write("### 데이터프레임")
 st.write(df)
 
-# 3. 그래프 출력 (Matplotlib)
-fig, ax = plt.subplots()
-ax.plot([1, 2, 3], [1, 4, 2])  # 좌표 (1,1) (2,4) (3,2) 이 3개 좌표가 연결된다.
-st.write("### Matplotlib 그래프")
-st.pyplot(fig)
+
 
 # 4. 이미지 출력
 st.write("### 이미지")
