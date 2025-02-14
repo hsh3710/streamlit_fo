@@ -2,64 +2,102 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
+st.title("파이썬 코드를 이용한 YOLOv3 객체 탐지 구현")
+st.code("""
+import cv2
+import numpy as np
+
+# YOLO 모델 및 설정 파일 경로 (실제 경로로 변경 필요)
+model_cfg = "yolov3-tiny.cfg"
+model_weights = "yolov3-tiny.weights"
+net = cv2.dnn.readNetFromDarknet(model_cfg, model_weights)
+
+# 클래스 이름 파일 (coco names)
+classes = []
+with open("coco.names", "r") as f:
+    classes = [line.strip() for line in f.readlines()]
+layer_names = net.getLayerNames()
+output_layers = [layer_names[i - 1] for i in net.getUnconnectedOutLayers()]
+colors = [(0, 255, 0)] # 바운딩 박스 색깔 (빨간색)
+
+# 비디오 캡쳐 또는 이미지 읽기
+cap = cv2.VideoCapture("highway.mp4") # 또는 cv2.imread("image.jpg")
+
+while True:
+    ret, frame = cap.read() # 또는 frame = 이미지
+    if not ret: break
+
+    height, width, channels = frame.shape
+
+    # YOLO 입력으로 사용할 이미지 전처리 (크기 조정, 정규화 등)
+    blob = cv2.dnn.blobFromImage(frame, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
+    net.setInput(blob)
+    outs = net.forward(output_layers)
+
+    # 검출 결과 처리
+    class_ids = []
+    confidences = []
+    boxes = []
+    for out in outs:
+        for detection in out:
+            scores = detection[5:]
+            class_id = np.argmax(scores)
+            confidence = scores[class_id]
+            if confidence > 0.01: # 신뢰도 0.5 이상만 검출
+                center_x = int(detection[0] * width)
+                center_y = int(detection[1] * height)
+                w = int(detection[2] * width)
+                h = int(detection[3] * height)
+                x = int(center_x - w / 2)
+                y = int(center_y - h / 2)
+                boxes.append([x, y, w, h])
+                confidences.append(float(confidence))
+                class_ids.append(class_id)
+
+    # Non-Maximum Suppression (겹치는 바운딩 박스 제거)
+    indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
+
+    # 검출된 객체 화면에 표시
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    for i in range(len(boxes)):
+        if i in indexes:
+            x, y, w, h = boxes[i]
+            label = str(classes[class_ids[i]])
+            color = colors[0] # 빨간색
+            cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
+            cv2.putText(frame, label, (x, y - 10), font, 0.5, color, 1)
+
+    cv2.imshow("Object Detection", frame)
+    if cv2.waitKey(1) & 0xFF == 27: # ESC 키 종료
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+
+        """,language = "python")
+
 st.write("""
-          ```python 
-            st.title("st.write() 활용 예시")
-         ``` 
+#### 코드 실행 순서
+
+1. 라이브러리 import (cv2, numpy)
+
+2. YOLO 모델 로드 (cfg, weights 파일 활용, OpenCV dnn 모듈)
+
+3. 클래스 이름 로드 (coco.names 파일)
+
+4. 입력 처리 (비디오, 이미지 파일 읽기)
+
+5. 프레임 반복 처리 (비디오, 이미지 한번 처리)
+
+6. 이미지 전처리 (YOLO 입력 형태, 크기 조정, 정규화)
+
+7. 객체 탐지 수행 (YOLO 모델 입력, 결과 획득)
+
+8. 탐지 결과 처리 (바운딩 박스, 신뢰도 점수, 클래스 ID 추출, NMS 적용)
+
+9. 결과 시각화 (바운딩 박스, 클래스 이름 이미지 표시)
+
+10. 결과 출력 (시각화 이미지 화면 출력)
+
+11. 종료 조건 확인 (ESC 키 입력 시 종료)
          """)
-
-st.title("st.write() 활용 예시")
-
-# 1. 텍스트 출력 (Markdown 지원)
-st.write("## 마크다운 제목")
-st.write("*강조된 텍스트*")
-st.write("***")
-st.write("- 다음")
-st.write("          - 다음")
-st.write("""
-        - `st.write()`에서 연결해서 쓰기
-            - 전 후로 "를 3개 씩 붙여준뒤 사용
-                - 그러면 이렇게 연결된 하위 표시 만들 수 있음.
-                - **마크다운**을 지원하는 곳에서만 사용 가능하다.
-         """)
-
-# 2. 데이터프레임 출력
-df = pd.DataFrame({'col1': [1, 2], 'col2': [3, 4]})
-st.write("### 데이터프레임")
-st.write(df)
-
-# 3. 그래프 출력 (Matplotlib)
-fig, ax = plt.subplots()
-ax.plot([1, 2, 3], [1, 4, 2])  # 좌표 (1,1) (2,4) (3,2) 이 3개 좌표가 연결된다.
-st.write("### Matplotlib 그래프")
-st.pyplot(fig)
-
-# 4. 이미지 출력
-st.write("### 이미지")
-st.image("https://cdn.pixabay.com/photo/2024/02/26/19/39/monochrome-image-8598798_1280.jpg", width=300)
-
-st.title("레이아웃 예시")
-
-# 5. 컬럼 나누기
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.header("첫 번째 컬럼")
-    st.write("컬럼 1 내용")
-
-with col2:
-    st.header("두 번째 컬럼")
-    st.image("https://cdn.pixabay.com/photo/2024/02/26/19/39/monochrome-image-8598798_1280.jpg", width=150)
-
-with col3:
-    st.header("세 번째 컬럼")
-    st.image("https://cdn.pixabay.com/photo/2024/02/26/19/39/monochrome-image-8598798_1280.jpg", width=150)
-
-
-# 6. 사이드바
-with st.sidebar:
-    st.header("사이드바 메뉴")
-    menu = st.radio("메뉴 선택", ["메뉴 1", "메뉴 2", "메뉴 3"])
-    st.write("선택된 메뉴:", menu)
-
-st.write("메인 화면 내용")
